@@ -1,4 +1,9 @@
 export const en = {
+  shadowquicSni: 'Required JLS server name. It must match the ShadowQUIC server configuration.',
+  shadowquicCongestion: 'ShadowQUIC congestion controller. Empty uses bbr.',
+  shadowquicEarlyData: 'Default true. The current backend still authenticates before application data; it does not replay early application data.',
+  shadowquicStream: 'Carry UDP packets over QUIC streams instead of datagrams. Default false.',
+  shadowquicHalfClose: 'Half-close inactivity in milliseconds. Empty uses 60000; zero disables the timeout.',
   groupGuidanceNoEditable: 'Only uniquely named groups in the main configuration can be edited here. Create a group in Groups, then return to add this node.',
   groupGuidanceAllContained: 'This node is already in every editable group',
   groupGuidanceAllContainedHelp: 'No membership changes are needed.',

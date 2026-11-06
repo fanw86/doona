@@ -20,7 +20,8 @@ const labels: Record<string, Key> = {
   serviceName: 'nodes.manual.service',
   obfs: 'nodes.manual.obfs',
   'obfs-password': 'nodes.manual.obfsPassword',
-  congestion_control: 'nodes.manual.congestion'
+  congestion_control: 'nodes.manual.congestion',
+  congestion: 'nodes.manual.congestion'
 };
 // Protocol terms and option names that honk's links spell out stay as they are: a field without a label here is named by its key.
 const terms: Record<string, string> = {alpn: 'ALPN', spx: 'SpiderX', ech_config: 'ECH config'};

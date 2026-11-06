@@ -1,5 +1,10 @@
 import type {Messages} from './en';
 export const zhTW: Messages = {
+  shadowquicSni: '必填的 JLS 伺服器名稱，必須與 ShadowQUIC 伺服器設定一致。',
+  shadowquicCongestion: 'ShadowQUIC 壅塞控制，留空使用 bbr。',
+  shadowquicEarlyData: '預設 true。目前後端仍在傳送應用資料前完成驗證，不會重播早期應用資料。',
+  shadowquicStream: '透過 QUIC 串流而非資料報傳輸 UDP，預設 false。',
+  shadowquicHalfClose: '半關閉後的閒置逾時，單位為毫秒。留空使用 60000，零表示停用。',
   groupGuidanceNoEditable: '此處只能編輯主設定中名稱唯一的策略群組。請先在策略群組頁面建立策略群組，再返回新增此節點。',
   groupGuidanceAllContained: '所有可編輯的策略群組均已包含此節點',
   groupGuidanceAllContainedHelp: '無需變更群組成員。',

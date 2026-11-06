@@ -140,6 +140,13 @@ export default function NodeForm({
     pluginObfs: t.nodeGuidePlugin
   };
   if (f.protocol === 'socks5') fieldHelp.username = fieldHelp.password = t.nodeGuideSocksCredentials;
+  if (f.protocol === 'shadowquic') {
+    fieldHelp.sni = t.shadowquicSni;
+    fieldHelp.congestion = t.shadowquicCongestion;
+    fieldHelp['zero-rtt'] = t.shadowquicEarlyData;
+    fieldHelp['over-stream'] = t.shadowquicStream;
+    fieldHelp['half-close-timeout'] = t.shadowquicHalfClose;
+  }
   const guide = (key: string, control: ReactNode) => (
     <VStack key={key} gap={1} style={{minWidth: 0}}>
       {control}

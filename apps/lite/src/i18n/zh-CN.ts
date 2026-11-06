@@ -1,5 +1,10 @@
 import type {Messages} from './en';
 export const zhCN: Messages = {
+  shadowquicSni: '必填的 JLS 服务器名称，必须与 ShadowQUIC 服务器配置一致。',
+  shadowquicCongestion: 'ShadowQUIC 拥塞控制，留空使用 bbr。',
+  shadowquicEarlyData: '默认 true。当前后端仍在发送应用数据前完成认证，不会重放早期应用数据。',
+  shadowquicStream: '通过 QUIC 流而非数据报传输 UDP，默认 false。',
+  shadowquicHalfClose: '半关闭后的空闲超时，单位为毫秒。留空使用 60000，零表示禁用。',
   groupGuidanceNoEditable: '此处只能编辑主配置中名称唯一的策略组。请先在策略组页面创建策略组，再返回添加此节点。',
   groupGuidanceAllContained: '所有可编辑的策略组均已包含此节点',
   groupGuidanceAllContainedHelp: '无需更改组成员。',
