@@ -2,7 +2,15 @@ name: ShadowQUIC UI integration
 on:
   push:
     branches: [feat/shadowquic-ui]
+    paths-ignore:
+      - e2e/shadowquic.spec.ts
+      - apps/lite/scripts/shadowquic-e2e.cjs
   workflow_dispatch:
+    inputs:
+      browser_only:
+        description: Rerun browser fixtures after test-only corrections
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -23,10 +31,15 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+        if: ${{ !inputs.browser_only }}
       - run: pnpm test:coverage
-      - run: pnpm build && pnpm check:size
+        if: ${{ !inputs.browser_only }}
+      - run: pnpm build
+      - run: pnpm check:size
+        if: ${{ !inputs.browser_only }}
       - run: pnpm -C apps/lite install --frozen-lockfile
       - run: pnpm -C apps/lite check
+        if: ${{ !inputs.browser_only }}
       - run: pnpm -C apps/lite build
       - run: pnpm exec playwright install chromium --with-deps
       - run: pnpm exec playwright test e2e/shadowquic.spec.ts --project chromium
