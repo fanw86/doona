@@ -47,4 +47,12 @@ describe('ShadowQUIC forms', () => {
     expect(edited).not.toContain('peer=');
     expect(edited).toContain(' -> socks5://127.0.0.1:1080');
   });
+  it.each(['alpn=', 'zero-rtt=', 'mtu=', 'mtu=+1400', 'over-stream=%20true%20'])('rejects empty or malformed imported values: %s', query => {
+    expect(() => parseNodeLink(`shadowquic://u:p@proxy.example?sni=cover.example&${query}`)).toThrow();
+  });
+  it('rejects exponent ports and untrimmed numbers or SNI', () => {
+    expect(manualInvalid({...valid(), port: '1e3'})).toContain('port');
+    expect(manualInvalid({...valid(), mtu: ' 1400'})).toContain('mtu');
+    expect(manualInvalid({...valid(), sni: ' cover.example'})).toContain('sni');
+  });
 });

@@ -420,6 +420,7 @@ function advancedInvalid(f: NodeFields, {key, range}: ManualField) {
   if (f.protocol === 'shadowquic' && key === 'sni' && !value) return true;
   if (!value) return false;
   if (f.protocol === 'shadowquic') {
+    if (key !== 'alpn' && value !== f[key]) return true;
     if (range) return !/^\d+$/.test(value) || !Number.isSafeInteger(Number(value)) || Number(value) < range[0] || Number(value) > range[1];
     if (key === 'zero-rtt' || key === 'over-stream') return !['0', '1', 'true', 'false'].includes(value);
     if (key === 'congestion') return !congestionControls.includes(value);
@@ -451,7 +452,7 @@ export function manualInvalid(f: NodeFields): string[] {
   const port = Number(f.port);
   return [
     ...(/^[^\s/?#@\\]+$/.test(f.host) ? [] : ['host']),
-    ...(Number.isInteger(port) && port >= 1 && port <= 65535 ? [] : ['port']),
+    ...(Number.isInteger(port) && port >= 1 && port <= 65535 && (f.protocol !== 'shadowquic' || /^\d+$/.test(f.port)) ? [] : ['port']),
     ...[...manualFields(f), ...advancedFields(f)]
       .filter(
         field =>
