@@ -4,6 +4,7 @@ const uuid = 'b831381d-6324-4d53-ad4f-8cda48b30811';
 const b64 = (s: string) => Buffer.from(s).toString('base64url');
 // Accepted vectors from honk-config/tests/share_link.rs at 40b11281b, plus edit invariants.
 const vectors = [
+  'shadowquic://user:p%40ss%3Aword@[2001:db8::1]:443?peer=cover.example&alpn=h3&congestion=bbr&zero-rtt=false&over-stream=true&half-close-timeout=0&mtu=1400#test',
   `ss://${b64('aes-128-gcm:password')}@example.com:8388#test`,
   'ss://aes-128-gcm:password@example.com:8388',
   `ss://${b64('aes-128-gcm:p@ss:word@example.com:8388')}`,

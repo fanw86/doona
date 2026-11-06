@@ -19,6 +19,8 @@ const listener = "experimental {\n  native_api { listen: '127.0.0.1:9090'\n    s
 describe('engineOf', () => {
   it('knows honk by its engine name and nothing else', () => {
     expect(honk.id).toBe('honk');
+    expect(honk.nodeLinkSchemes).toContain('shadowquic');
+    expect(other.nodeLinkSchemes).toBeNull();
     expect(honk.flowDemandGraceSeconds).toBe(60);
     expect(other.flowDemandGraceSeconds).toBeNull();
     expect(other.id).toBe('unknown');
@@ -212,7 +214,7 @@ describe('an unknown engine', () => {
 it('limits known honk share-link schemes without guessing for other engines', () => {
   // The schemes honk's share-link parser names in its unknown-protocol error.
   expect(new Set(honk.nodeLinkSchemes)).toEqual(
-    new Set(['socks5', 'socks4', 'socks4a', 'ss', 'trojan', 'anytls', 'vmess', 'vless', 'hysteria2', 'hysteria', 'hy2', 'tuic', 'juicity'])
+    new Set(['socks5', 'socks4', 'socks4a', 'ss', 'trojan', 'anytls', 'vmess', 'vless', 'hysteria2', 'hysteria', 'hy2', 'tuic', 'juicity', 'shadowquic'])
   );
   expect(honk.nodeLinkSchemes).not.toContain('garbage');
   expect(other.nodeLinkSchemes).toBeNull();

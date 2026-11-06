@@ -1,7 +1,13 @@
-export const protocols = ['vmess', 'vless', 'hysteria2', 'ss', 'trojan', 'tuic', 'anytls', 'socks5', 'juicity'] as const;
+export const protocols = ['vmess', 'vless', 'hysteria2', 'ss', 'trojan', 'tuic', 'anytls', 'socks5', 'juicity', 'shadowquic'] as const;
 export type Protocol = (typeof protocols)[number];
 export const isProtocol = (value: string): value is Protocol => (protocols as readonly string[]).includes(value);
-const protocolNames: Partial<Record<Protocol, string>> = {ss: 'Shadowsocks', hysteria2: 'Hysteria2', anytls: 'AnyTLS', juicity: 'Juicity'};
+const protocolNames: Partial<Record<Protocol, string>> = {
+  ss: 'Shadowsocks',
+  hysteria2: 'Hysteria2',
+  anytls: 'AnyTLS',
+  juicity: 'Juicity',
+  shadowquic: 'ShadowQUIC'
+};
 export const protocolName = (protocol: Protocol) => protocolNames[protocol] ?? protocol.toUpperCase();
 export type NodeFields = Record<string, string> & {protocol: Protocol; host: string; port: string; username: string; password: string; name: string};
 export type NodeDocument = {original: string; initial: NodeFields; query: string; json?: Record<string, unknown>; tail: string};
@@ -182,6 +188,22 @@ export function parseNodeLink(original: string): {document: NodeDocument; fields
     }
   }
   if (protocol === 'vmess') fields.method = fields.method.trim().toLowerCase() || 'auto';
+  if (protocol === 'shadowquic') {
+    const params = new URLSearchParams(query);
+    const allowed = ['sni', 'peer', 'alpn', 'congestion', 'zero-rtt', 'over-stream', 'half-close-timeout', 'mtu', 'remark'];
+    for (const [key, value] of params) {
+      if (!allowed.includes(key) || params.getAll(key).some(other => other !== value)) throw new Error('Invalid ShadowQUIC option');
+      if (key !== 'remark' && !value) throw new Error('Empty ShadowQUIC option');
+      if (['zero-rtt', 'over-stream'].includes(key) && !['true', 'false', '0', '1'].includes(value)) throw new Error('Invalid ShadowQUIC boolean');
+      if (['mtu', 'half-close-timeout'].includes(key) && !/^\d+$/.test(value)) throw new Error('Invalid ShadowQUIC number');
+    }
+    if (params.has('sni') && params.has('peer') && params.get('sni') !== params.get('peer')) throw new Error('Conflicting ShadowQUIC server names');
+    if (manualInvalid(fields).length) throw new Error('Invalid ShadowQUIC fields');
+    for (const key of ['zero-rtt', 'over-stream']) {
+      if (fields[key] === '1') fields[key] = 'true';
+      if (fields[key] === '0') fields[key] = 'false';
+    }
+  }
   const document = {original, initial: {...fields}, query, json, tail: chain.length ? ` -> ${chain.join(' -> ')}` : ''};
   return {document, fields};
 }
@@ -265,7 +287,7 @@ export const securityOptions = (protocol: Protocol) =>
   protocol === 'trojan' ? ['tls', 'reality'] : protocol === 'vless' ? ['none', 'tls', 'reality'] : protocol === 'vmess' ? ['none', 'tls'] : undefined;
 // Whether the node carries a TLS handshake, so the form asks for its SNI.
 export const usesTls = (f: NodeFields) =>
-  !['ss', 'socks5'].includes(f.protocol) && (f.security !== 'none' || ['tuic', 'juicity', 'hysteria2', 'anytls'].includes(f.protocol));
+  !['ss', 'socks5', 'shadowquic'].includes(f.protocol) && (f.security !== 'none' || ['tuic', 'juicity', 'hysteria2', 'anytls'].includes(f.protocol));
 // XTLS flow rides only on VLESS over TCP with TLS or REALITY.
 const flowOffered = (f: NodeFields) => f.protocol === 'vless' && f.type === 'tcp' && f.security !== 'none';
 // The fields the form shows after the server address and port, for the node as filled in so far: which credentials,
@@ -274,7 +296,7 @@ export function manualFields(f: NodeFields): ManualField[] {
   const p = f.protocol;
   const fields: ManualField[] = [];
   const add = (key: string, more: Omit<ManualField, 'key'> = {}) => fields.push({key, ...more});
-  if (['vmess', 'vless', 'tuic', 'juicity', 'socks5'].includes(p)) add('username', {required: p !== 'socks5'});
+  if (['vmess', 'vless', 'tuic', 'juicity', 'socks5', 'shadowquic'].includes(p)) add('username', {required: p !== 'socks5'});
   if (!['vmess', 'vless'].includes(p)) add('password', {required: p !== 'socks5'});
   if (p === 'ss') add('method', {options: shadowsocksMethods});
   if (p === 'vmess') add('method', {options: vmessMethods});
@@ -305,6 +327,10 @@ export function manualFields(f: NodeFields): ManualField[] {
     if (f.obfs) add('obfs-password');
   }
   if (p === 'tuic') add('congestion_control', {options: congestionControls});
+  if (p === 'shadowquic') {
+    add('sni', {required: true});
+    add('congestion', {options: ['', ...congestionControls]});
+  }
   return fields;
 }
 // The options honk reads beyond manualFields, for the node as filled in so far. Each applies only where honk's share-link parser
@@ -315,6 +341,14 @@ export function advancedFields(f: NodeFields): ManualField[] {
   const add = (key: string, more: Omit<ManualField, 'key'> = {}) => fields.push({key, ...more});
   const count = (key: string, range: [number, number] = [0, Number.MAX_SAFE_INTEGER], required = false) => add(key, {range, required});
   const vision = flowOffered(f) && !!f.flow;
+  if (p === 'shadowquic') {
+    add('alpn');
+    add('zero-rtt', {options: ['', 'true', 'false']});
+    add('over-stream', {options: ['', 'true', 'false']});
+    count('mtu', [1200, 65527]);
+    count('half-close-timeout');
+    return fields;
+  }
   if (p === 'tuic' || (f.type === 'xhttp' && usesTls(f))) add('alpn');
   if (usesTls(f)) {
     add('pinSHA256');
@@ -383,7 +417,31 @@ function hopsValid(spec: string) {
 // Whether honk reads a filled advanced value as given: a whole number in range, hop ports that do not repeat, H2 alone for XHTTP.
 function advancedInvalid(f: NodeFields, {key, range}: ManualField) {
   const value = (f[key] ?? '').trim();
+  if (f.protocol === 'shadowquic' && key === 'sni' && !value) return true;
   if (!value) return false;
+  if (f.protocol === 'shadowquic') {
+    if (range) return !/^\d+$/.test(value) || !Number.isSafeInteger(Number(value)) || Number(value) < range[0] || Number(value) > range[1];
+    if (key === 'zero-rtt' || key === 'over-stream') return !['0', '1', 'true', 'false'].includes(value);
+    if (key === 'congestion') return !congestionControls.includes(value);
+    if (key === 'alpn') return value.split(',').some(item => !item.trim() || new TextEncoder().encode(item.trim()).length > 255);
+    if (key === 'sni') {
+      if (value.includes(':')) {
+        try {
+          new URL(`https://[${value}]/`);
+          return false;
+        } catch {
+          return true;
+        }
+      }
+      return (
+        value.length > 253 ||
+        !value
+          .replace(/\.$/, '')
+          .split('.')
+          .every(label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(label))
+      );
+    }
+  }
   if (range) return !/^-?\d+[a-z]*$/i.test(value) || Number.parseInt(value, 10) < range[0] || Number.parseInt(value, 10) > range[1];
   if (key === 'alpn') return f.type === 'xhttp' && value.split(',').some(item => item.trim() && item.trim() !== 'h2');
   return key === 'mport' && !hopsValid(value);

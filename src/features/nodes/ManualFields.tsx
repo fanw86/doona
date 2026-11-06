@@ -46,7 +46,7 @@ export function ManualFields({
   const choice = (id: string) => ({id, label: id === '' ? t('ui.none') : id});
   const advanced = advancedFields(draft);
   const field = ({key, options, flag, required, range}: ManualField) => {
-    const uuid = key === 'username' && draft.protocol !== 'socks5';
+    const uuid = key === 'username' && !['socks5', 'shadowquic'].includes(draft.protocol);
     const label = labels[uuid ? 'uuid' : key] ? t(labels[uuid ? 'uuid' : key]) : (terms[key] ?? key);
     return options ? (
       <LabeledSelect

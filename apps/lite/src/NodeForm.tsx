@@ -82,7 +82,7 @@ export default function NodeForm({
     setState({...state, fields});
     const complete = fields.host && fields.port && (fields.username || fields.password || fields.protocol === 'socks5');
     const incomplete = manualInvalid(fields).some(key => !['host', 'port', 'username', 'password'].includes(key));
-    change(complete && !incomplete ? nodeLink(fields, state.document) : '');
+    change(complete && !incomplete && (fields.protocol !== 'shadowquic' || manualInvalid(fields).length === 0) ? nodeLink(fields, state.document) : '');
   };
   const pluginOptions = (f['plugin-opts'] ?? '').split(';').filter(Boolean);
   const pluginValue = (key: string) => pluginOptions.find(item => item.split('=')[0] === key)?.slice(key.length + 1) ?? '';
@@ -227,7 +227,8 @@ export default function NodeForm({
                   isDisabled={disabled}
                 />
               )}
-              {['vmess', 'vless', 'tuic', 'juicity', 'socks5'].includes(f.protocol) && text('username', f.protocol === 'socks5' ? t.username : 'UUID')}
+              {['vmess', 'vless', 'tuic', 'juicity', 'socks5', 'shadowquic'].includes(f.protocol) &&
+                text('username', ['socks5', 'shadowquic'].includes(f.protocol) ? t.username : 'UUID')}
               {!['vmess', 'vless'].includes(f.protocol) && text('password', t.password)}
             </Grid>
           </VStack>
@@ -289,6 +290,7 @@ export default function NodeForm({
                   {f.protocol === 'vmess' && choice('method', vmessMethods, t.cipher)}
                   {security && choice('security', security, t.security)}
                   {usesTls(f) && text('sni', 'SNI')}
+                  {f.protocol === 'shadowquic' && text('sni', 'SNI')}
                   {f.security === 'reality' && (
                     <>
                       {text('pbk', t.publicKey)}
@@ -318,6 +320,7 @@ export default function NodeForm({
                   )}
 
                   {f.protocol === 'tuic' && choice('congestion_control', congestionControls)}
+                  {f.protocol === 'shadowquic' && choice('congestion', ['', ...congestionControls])}
                 </Grid>
               </VStack>
             </Card>

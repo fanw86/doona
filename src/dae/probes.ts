@@ -12,6 +12,7 @@ const protocols: Record<string, {connect: boolean; stream: boolean; udp: boolean
   hysteria2: {connect: false, stream: true, udp: true},
   tuic: {connect: false, stream: true, udp: true},
   juicity: {connect: false, stream: true, udp: true},
+  shadowquic: {connect: false, stream: true, udp: true},
   direct: {connect: false, stream: true, udp: true},
   block: {connect: false, stream: false, udp: false}
 };

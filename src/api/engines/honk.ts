@@ -155,7 +155,7 @@ function nest(settings: Array<{path: string[]; value: string}>, indent: string):
 
 export const honk: Engine = {
   id: 'honk',
-  nodeLinkSchemes: ['socks5', 'socks4', 'socks4a', 'ss', 'trojan', 'anytls', 'vmess', 'vless', 'hysteria2', 'hysteria', 'hy2', 'tuic', 'juicity'],
+  nodeLinkSchemes: ['socks5', 'socks4', 'socks4a', 'ss', 'trojan', 'anytls', 'vmess', 'vless', 'hysteria2', 'hysteria', 'hy2', 'tuic', 'juicity', 'shadowquic'],
   flowDemandGraceSeconds: 60,
   globalSettings: honkGlobal,
   restartOnly: honkRestartOnly,
