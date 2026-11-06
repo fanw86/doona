@@ -329,7 +329,7 @@ export function manualFields(f: NodeFields): ManualField[] {
   if (p === 'tuic') add('congestion_control', {options: congestionControls});
   if (p === 'shadowquic') {
     add('sni', {required: true});
-    add('congestion', {options: ['', ...congestionControls]});
+    add('congestion', {options: ['bbr', 'cubic', 'new_reno']});
   }
   return fields;
 }
@@ -343,8 +343,8 @@ export function advancedFields(f: NodeFields): ManualField[] {
   const vision = flowOffered(f) && !!f.flow;
   if (p === 'shadowquic') {
     add('alpn');
-    add('zero-rtt', {options: ['', 'true', 'false']});
-    add('over-stream', {options: ['', 'true', 'false']});
+    add('zero-rtt', {options: ['true', 'false']});
+    add('over-stream', {options: ['false', 'true']});
     count('mtu', [1200, 65527]);
     count('half-close-timeout');
     return fields;

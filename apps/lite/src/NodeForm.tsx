@@ -327,7 +327,7 @@ export default function NodeForm({
                   )}
 
                   {f.protocol === 'tuic' && choice('congestion_control', congestionControls)}
-                  {f.protocol === 'shadowquic' && choice('congestion', ['', ...congestionControls])}
+                  {f.protocol === 'shadowquic' && choice('congestion', ['bbr', 'cubic', 'new_reno'])}
                 </Grid>
               </VStack>
             </Card>
