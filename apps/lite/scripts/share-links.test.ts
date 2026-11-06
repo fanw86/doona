@@ -45,7 +45,13 @@ describe.each(vectors)('share link %s', link => {
   });
 });
 it.each(protocols)('creates a %s link from fields', protocol => {
-  const fields = {...emptyNode(protocol), host: 'example.com', username: uuid, password: protocol === 'vmess' || protocol === 'vless' ? '' : 'secret'};
+  const fields = {
+    ...emptyNode(protocol),
+    host: 'example.com',
+    username: uuid,
+    password: protocol === 'vmess' || protocol === 'vless' ? '' : 'secret',
+    ...(protocol === 'shadowquic' ? {sni: 'cover.example'} : {})
+  };
   const parsed = parseNodeLink(nodeLink(fields)).fields;
   expect(parsed.host).toBe(fields.host);
   expect(parsed.protocol).toBe(protocol);
