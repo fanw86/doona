@@ -24,7 +24,8 @@ const fs = require('node:fs');
     await expect(dialog.getByLabel('UUID', {exact: true})).toHaveCount(0);
     await dialog.getByRole('button', {name: /^zero-rtt/}).click();
     await page.getByRole('option', {name: 'false', exact: true}).click();
-    await expect(dialog).toContainText('zero-rtt=false');
+    await expect(dialog.getByRole('button', {name: /^zero-rtt/})).toContainText('false');
+    await expect(dialog.getByRole('button', {name: 'Add', exact: true})).toBeEnabled();
     fs.mkdirSync('test-results', {recursive: true});
     await page.screenshot({path: 'test-results/shadowquic-lite.png'});
   } finally {
