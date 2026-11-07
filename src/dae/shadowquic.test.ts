@@ -54,5 +54,6 @@ describe('ShadowQUIC forms', () => {
     expect(manualInvalid({...valid(), port: '1e3'})).toContain('port');
     expect(manualInvalid({...valid(), mtu: ' 1400'})).toContain('mtu');
     expect(manualInvalid({...valid(), sni: ' cover.example'})).toContain('sni');
+    expect(manualInvalid({...valid(), sni: 'cover.example.'})).toContain('sni');
   });
 });

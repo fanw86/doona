@@ -434,13 +434,7 @@ function advancedInvalid(f: NodeFields, {key, range}: ManualField) {
           return true;
         }
       }
-      return (
-        value.length > 253 ||
-        !value
-          .replace(/\.$/, '')
-          .split('.')
-          .every(label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(label))
-      );
+      return value.length > 253 || !value.split('.').every(label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(label));
     }
   }
   if (range) return !/^-?\d+[a-z]*$/i.test(value) || Number.parseInt(value, 10) < range[0] || Number.parseInt(value, 10) > range[1];
